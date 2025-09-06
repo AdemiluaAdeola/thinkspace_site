@@ -439,7 +439,6 @@
         <div style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center;">
             <div style="flex: 1;">
                 <div class="search-container">
-                    <i class="fas fa-search"></i>
                     <input type="text" class="form-control" placeholder="Search webinars..." id="webinarSearch">
                 </div>
             </div>
@@ -447,19 +446,6 @@
                 <i class="fas fa-filter"></i> Apply Filters
             </button>
         </div>
-    </div>
-
-    <!-- View Toggle -->
-    <div class="view-toggle">
-        <button class="view-btn active" data-view="card">
-            <i class="fas fa-th-large"></i> Card View
-        </button>
-        <button class="view-btn" data-view="table">
-            <i class="fas fa-table"></i> Table View
-        </button>
-        <button class="view-btn" data-view="calendar">
-            <i class="fas fa-calendar"></i> Calendar View
-        </button>
     </div>
 
     <!-- Card View -->
@@ -525,13 +511,13 @@
                 </div>
                 
                 <div class="webinar-actions">
-                    <a href="{% url 'webinar_detail' webinar.id %}" class="btn btn-sm btn-secondary" title="View">
+                    <a href="{% url 'webinar_reg' webinar.id %}" class="btn btn-sm btn-secondary" title="View">
                         <i class="fas fa-eye"></i>
                     </a>
                     <a href="{% url 'webinar_update' webinar.id %}" class="btn btn-sm btn-secondary" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <a href="" class="btn btn-sm btn-secondary" title="Registrations">
+                    <a href="{% url 'webinar_reg' webinar.id %}" class="btn btn-sm btn-secondary" title="Registrations">
                         <i class="fas fa-users"></i>
                     </a>
                     <button class="btn btn-sm btn-danger delete-webinar" data-id="{{ webinar.id }}" data-title="{{ webinar.title }}" title="Delete">
@@ -551,130 +537,6 @@
         </div>
         {% endfor %}
     </div>
-
-    <!-- Table View -->
-    <div id="tableView" class="content-card" style="display: none;">
-        <div class="card-header">
-            <h2 class="card-title">Webinars ({{ webinars|length }})</h2>
-            <div class="card-actions">
-                <button class="btn btn-sm btn-secondary">
-                    <i class="fas fa-download"></i> Export
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="webinar-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Date & Time</th>
-                            <th>Host</th>
-                            <th>Speakers</th>
-                            <th>Status</th>
-                            <th>Registrations</th>
-                            <th>Price</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for webinar in webinars %}
-                        <tr data-status="{{ webinar.status }}" data-date="{{ webinar.start_datetime|date:'Y-m-d' }}" data-host="{{ webinar.host.id }}" data-featured="{{ webinar.is_featured|lower }}">
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    {% if webinar.featured_image %}
-                                    <img src="{{ webinar.featured_image.url }}" alt="{{ webinar.title }}" class="webinar-table-image">
-                                    {% else %}
-                                    <div class="webinar-table-image" style="background: var(--light); display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-video" style="color: var(--text-lighter);"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <div style="font-weight: 600;">{{ webinar.title }}</div>
-                                        {% if webinar.is_featured %}
-                                        <div style="font-size: 0.75rem; color: var(--secondary);">Featured</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div>{{ webinar.start_datetime|date:"M d, Y" }}</div>
-                                <div style="font-size: 0.85rem; color: var(--text-light);">{{ webinar.start_datetime|time }}</div>
-                            </td>
-                            <td>{{ webinar.host.get_full_name|default:webinar.host.username }}</td>
-                            <td>
-                                {% for speaker in webinar.speakers.all %}
-                                <span class="status-badge status-published" style="margin-bottom: 0.25rem; display: inline-block;">{{ speaker.name }}</span>
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <span class="status-badge status-{{ webinar.status }}">{{ webinar.status|title }}</span>
-                            </td>
-                            <td>{{ webinar.registrations.count }}</td>
-                            <td>{% if webinar.is_free %}Free{% else %}Ksh {{ webinar.price }}{% endif %}</td>
-                            <td>
-                                <div class="table-actions">
-                                    <a href="{% url 'webinar_update' webinar.id %}" class="btn btn-sm btn-secondary" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="" class="btn btn-sm btn-secondary" title="Registrations">
-                                        <i class="fas fa-users"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-danger delete-webinar" data-id="{{ webinar.id }}" data-title="{{ webinar.title }}" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Calendar View -->
-    <div id="calendarView" class="content-card calendar-view">
-        <div class="card-header">
-            <h2 class="card-title">Webinar Calendar</h2>
-            <div class="calendar-nav">
-                <button class="btn btn-sm btn-secondary" id="prevMonth">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="btn btn-sm btn-secondary" id="nextMonth">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-            <h3 id="calendarMonth" style="text-align: center; margin-bottom: 1.5rem;">September 2023</h3>
-            
-            <div class="calendar-grid">
-                <div class="calendar-day-header">Sun</div>
-                <div class="calendar-day-header">Mon</div>
-                <div class="calendar-day-header">Tue</div>
-                <div class="calendar-day-header">Wed</div>
-                <div class="calendar-day-header">Thu</div>
-                <div class="calendar-day-header">Fri</div>
-                <div class="calendar-day-header">Sat</div>
-                
-                <!-- Calendar days will be populated by JavaScript -->
-                <div class="calendar-day empty"></div>
-                <div class="calendar-day empty"></div>
-                <div class="calendar-day empty"></div>
-                <div class="calendar-day empty"></div>
-                <div class="calendar-day empty"></div>
-                <div class="calendar-day">
-                    <div class="day-number">1</div>
-                </div>
-                <div class="calendar-day">
-                    <div class="day-number">2</div>
-                </div>
-                <!-- More days would be added dynamically -->
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Delete Confirmation Modal -->
 <div class="modal-overlay" id="deleteModal">

@@ -40,6 +40,18 @@ def blog(request):
     return render(request, 'dashboard/blog.html', context)
 
 # In your views.py
+def admin_blog_management(request):
+    blogs = Blog.objects.all().order_by('-created_at')
+    categories = Category.objects.all()
+    authors = User.objects.filter(blog__isnull=False).distinct()
+    
+    context = {
+        'blogs': blogs,
+        'categories': categories,
+        'authors': authors,
+    }
+    return render(request, 'dashboard/admin_blog_management.html', context)
+
 def webinar(request):
     webinars = Webinar.objects.all().order_by('-start_datetime')
     hosts = User.objects.filter(hosted_webinars__isnull=False).distinct()
@@ -58,3 +70,51 @@ def user(request):
         'users': users,
     }
     return render(request, 'dashboard/user_management.html', context)
+
+# In your views.py
+def admin_webinar_registrations(request, webinar_id=None):
+    if webinar_id:
+        webinar = get_object_or_404(Webinar, id=webinar_id)
+        registrations = WebinarRegistration.objects.filter(webinar=webinar)
+    else:
+        webinar = None
+        registrations = WebinarRegistration.objects.all()
+    
+    webinars = Webinar.objects.all()
+    
+    context = {
+        'registrations': registrations,
+        'webinars': webinars,
+        'webinar': webinar,
+    }
+    return render(request, 'dashboard/admin_webinar_registrations.html', context)
+
+def is_admin(user):
+    """Check if user is staff/admin"""
+    return user.is_staff or user.is_superuser
+
+@login_required
+@user_passes_test(is_admin)
+def registration_edit(request, pk):
+    """Edit a registration"""
+    registration = get_object_or_404(WebinarRegistration, pk=pk)
+    
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST, instance=registration)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Registration updated successfully!')
+            return redirect('webinar_management')
+    else:
+        form = RegistrationForm(instance=registration)
+    
+    return render(request, 'dashboard/registrations.html', {
+        'form': form,
+        'registration': registration
+    })
+
+def webinar_reg(response, pk):
+    webinar = get_object_or_404(Webinar, id=pk)
+    registrations = WebinarRegistration.objects.filter(webinar=webinar)
+
+    return render(response, 'dashboard/webinar_details.html', {'webinar':webinar, 'registrations':registrations})

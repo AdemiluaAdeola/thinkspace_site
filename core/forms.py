@@ -47,26 +47,17 @@ class CreateWebinar(forms.ModelForm):
             'meeting_url',
             'recording_url',
         ]
-        
-
-# class WebinarRegistrationForm(forms.ModelForm):
-#     class Meta:
-#         model=WebinarRegistration
-#         fields=[
-#             'question',
-#             'payment_reference',
-#         ]
-#         widgets = {
-#             'question': forms.Textarea(attrs={
-#                 'rows': 8,
-#                 'placeholder': 'What questions would you like to ask the speaker?'
-#             }),
-#         }
 
 class WebinarRegistrationForm(forms.ModelForm):
     class Meta:
         model = WebinarRegistration
-        fields = ['full_name', 'email', 'question', 'payment_reference']
+        fields = [
+            # 'full_name',
+            # 'email',
+            # 'status',
+            'question',
+            'payment_reference'
+        ]
         widgets = {
             'question': forms.Textarea(attrs={
                 'rows': 3,
@@ -81,5 +72,15 @@ class WebinarRegistrationForm(forms.ModelForm):
                 'class': 'form-control'
             })
 
-class SpeakerForm(forms.ModelForm):
-    pass
+class RegistrationForm(forms.ModelForm):
+    class Meta:
+        model = WebinarRegistration
+        fields = ['full_name', 'email', 'status', 'question']
+        widgets = {
+            'question': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})

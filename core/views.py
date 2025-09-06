@@ -76,9 +76,6 @@ def blogpost(response, pk):
             )
             return redirect('blogpost', pk=pk)
 
-        else:
-            print("invalid code")
-
     else:
         form = CommentSection()
         return render(response, 'blog/post.html', {'blog':blog, 'form':form})
@@ -102,31 +99,57 @@ def webinar_detail(request, pk):
     if request.method == 'POST':
         form = WebinarRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
+            # Check if user is already registered (prevent duplicate registrations)
+            if is_registered:
+                messages.error(request, 'You are already registered for this webinar!')
+                return redirect('webinar_detail', pk=webinar.pk)
+            
+            # Create registration
             registration = form.save(commit=False)
             registration.webinar = webinar
+            registration.status = "pending"
             
-            # If user is authenticated, prefill name and email
+            # Set user information if authenticated
             if request.user.is_authenticated:
                 registration.full_name = f"{request.user.first_name} {request.user.last_name}"
                 registration.email = request.user.email
             
             registration.save()
+            
             messages.success(request, 'Your registration was successful!')
             return redirect('webinar_detail', pk=webinar.pk)
+        
     else:
-        # Prefill form for authenticated users
-        initial_data = {}
-        if request.user.is_authenticated:
-            initial_data = {
-                'full_name': f"{request.user.first_name} {request.user.last_name}",
-                'email': request.user.email
-            }
-        form = WebinarRegistrationForm(initial=initial_data)
+        form = WebinarRegistrationForm()
+
+        context = {
+            'webinar': webinar,
+            'form': form,
+            'is_registered': is_registered,
+            'now': timezone.now(),
+        }
+        return render(request, 'webinar/details.html', context)
     
-    context = {
-        'webinar': webinar,
-        'form': form,
-        'is_registered': is_registered,
-        'now': timezone.now(),
-    }
-    return render(request, 'webinar/details.html', context)
+def webinar_register(response, pk):
+    webinar = Webinar.objects.get(id=pk)
+    if response.method == "POST":
+        form = WebinarRegistrationForm(response.POST)
+        if form.is_valid():
+            n = f"{response.user.first_name} {response.user.last_name}"
+            e = f"{response.user.email}"
+            c = form.cleaned_data["question"]
+            status = "pending"
+            payment_reference = form.cleaned_data.get('payment_reference')
+            WebinarRegistration.objects.create(
+                webinar=webinar,
+                full_name=n,
+                email=e,
+                question=c,
+                status=status,
+                payment_reference=payment_reference,
+            )
+            return redirect('webinar_register', pk=pk)
+
+    else:
+        form = WebinarRegistrationForm()
+        return render(response, 'webinar/register.html', {'webinar':webinar, 'form':form})

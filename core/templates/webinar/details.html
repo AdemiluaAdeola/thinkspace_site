@@ -406,7 +406,7 @@
                         </div>
                         <div class="meta-content">
                             <h4>Price</h4>
-                            <p>{% if webinar.is_free %}Free{% else %}${{ webinar.price }}{% endif %}</p>
+                            <p>{% if webinar.is_free %}Free{% else %}₦{{ webinar.price }}{% endif %}</p>
                         </div>
                     </div>
                     <div class="meta-item">
@@ -490,7 +490,7 @@
                 {% endif %}
                 
                 <div class="price-tag {% if webinar.is_free %}free{% endif %}">
-                    {% if webinar.is_free %}Free{% else %}${{ webinar.price }}{% endif %}
+                    {% if webinar.is_free %}Free{% else %}₦{{ webinar.price }}{% endif %}
                 </div>
                 
                 <ul class="registration-features">
@@ -503,20 +503,6 @@
                 {% if not is_registered %}
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label class="form-label" for="id_full_name">Full Name</label>
-                            {{ form.full_name }}
-                            {{ form.full_name.errors }}
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="id_email">Email Address</label>
-                            {{ form.email }}
-                            {{ form.email.errors }}
-                        </div>
-                    </div>
-                    
                     <div class="form-group">
                         <label class="form-label" for="id_question">Questions for the Speaker (Optional)</label>
                         {{ form.question }}
@@ -527,13 +513,15 @@
                     <div class="form-group">
                         <label class="form-label" for="id_payment_reference">Proof of Payment</label>
                         {{ form.payment_reference }}
-                        <small class="form-text">Please upload a screenshot or document showing your payment confirmation.</small>
+                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">
+                            Please upload a screenshot or document showing your payment confirmation.
+                        </small>
                         {{ form.payment_reference.errors }}
                     </div>
                     {% endif %}
                     
                     <button type="submit" class="btn btn-primary" style="width: 100%;">
-                        {% if webinar.is_free %}Register Now{% else %}Complete Registration{% endif %}
+                        Complete Registration
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </form>

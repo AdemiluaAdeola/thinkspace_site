@@ -269,7 +269,6 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th style="width: 50px;"></th>
                             <th>Title</th>
                             <th>Author</th>
                             <th>Categories</th>
@@ -282,16 +281,11 @@
                         {% for blog in blogs %}
                         <tr>
                             <td>
-                                <input type="checkbox" class="form-check-input blog-checkbox" data-id="{{ blog.id }}">
-                            </td>
-                            <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                                     <img src="{{ blog.cover.url }}" alt="{{ blog.title }}" class="blog-cover">
                                     <div>
                                         <div style="font-weight: 600;">{{ blog.title|truncatewords:5 }}</div>
-                                        <div style="font-size: 0.85rem; color: var(--text-light);">
-                                            {{ blog.snippet|truncatewords:8 }}
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </td>
