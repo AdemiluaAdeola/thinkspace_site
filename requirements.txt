@@ -28,10 +28,5 @@ whitenoise==6.6.0  # Static files
 django-storages==1.14.0  # For S3/cloud storage
 boto3==1.28.57  # AWS SDK
 
-# Development tools
-django-debug-toolbar==4.1.0  # Debugging
-django-extensions==3.2.3  # Useful extensions
-ipython==8.14.0  # Enhanced shell
-
 # Country support
 django-countries==7.5

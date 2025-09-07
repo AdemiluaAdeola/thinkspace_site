@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: your-django-app
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn your_project_name.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromService:
+          type: postgres
+          name: your-django-db
+          property: connectionString
+
+databases:
+  - name: your-django-db
+    plan: free
+    databaseName: your_django_db
+    user: your_django_user
