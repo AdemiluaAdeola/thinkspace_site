@@ -10,7 +10,7 @@ psycopg2-binary==2.9.9  # PostgreSQL adapter (or use mysqlclient for MySQL)
 django-ckeditor==6.7.0  # Rich text editor
 django-taggit==4.0.0  # Tagging functionality
 django-summernote==0.8.20.0  # Alternative rich text editor
-Pillow==10.0.1  # Image processing
+Pillow==9.5.0   # Even more stable
 
 # User authentication & authorization
 django-allauth==0.58.1  # Social authentication
