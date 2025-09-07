@@ -3,6 +3,8 @@ services:
     name: your-django-app
     env: python
     plan: free
+    python:
+      version: 3.11.8  # Explicit version specification
     buildCommand: "./build.sh"
     startCommand: "gunicorn mysite.wsgi:application"
     envVars:
@@ -17,9 +19,4 @@ services:
           type: postgres
           name: your-django-db
           property: connectionString
-
-databases:
-  - name: your-django-db
-    plan: free
-    databaseName: your_django_db
-    user: your_django_user
+          
