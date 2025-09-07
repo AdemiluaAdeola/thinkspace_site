@@ -19,4 +19,8 @@ services:
           type: postgres
           name: your-django-db
           property: connectionString
-          
+        
+databases:
+  - name: mindcraft
+    databaseName: mindcraft
+    user: mindcraft_user
