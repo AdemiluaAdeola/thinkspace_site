@@ -12,17 +12,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import dj_database_url
 from pathlib import Path
 import os
-import environ
 
-env = environ.Env()
-environ.Env.read_env()
-
-# Base directory
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security settings
-SECRET_KEY = env('SECRET_KEY', default='your-secret-key-here')
-DEBUG = env.bool('DEBUG', default=False)
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure--j#6o41sy$vn$*0osb-eq=s!kn56*^m$4808z^ci^1slt-o0pl'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -82,10 +84,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=env('DATABASE_URL', default='sqlite:///db.sqlite3'),
-        conn_max_age=600
-    )
+    "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
 
 
