@@ -17,17 +17,32 @@ import random
 def is_admin(user):
     return user.is_staff or user.is_superuser
 
-def index(request):
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def index(response):
     context = {
         'total_users': User.objects.count(),
         'total_webinars': Webinar.objects.count(),
         'total_blogs': Blog.objects.count(),
         'published_blogs': Blog.objects.filter(is_verified=True).count(),
     }
-    return render(request, 'dashboard/admin_dashboard.html', context)
+    return render(response, 'dashboard/admin_dashboard.html', context)
 
-# In your views.py
-def blog(request):
+# def blog(request):
+#     blogs = Blog.objects.all().order_by('-created_at')
+#     categories = Category.objects.all()
+#     authors = User.objects.filter(blog__isnull=False).distinct()
+    
+#     context = {
+#         'blogs': blogs,
+#         'categories': categories,
+#         'authors': authors,
+#     }
+#     return render(request, 'dashboard/blog.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def admin_blog_management(response):
     blogs = Blog.objects.all().order_by('-created_at')
     categories = Category.objects.all()
     authors = User.objects.filter(blog__isnull=False).distinct()
@@ -37,22 +52,11 @@ def blog(request):
         'categories': categories,
         'authors': authors,
     }
-    return render(request, 'dashboard/blog.html', context)
+    return render(response, 'dashboard/admin_blog_management.html', context)
 
-# In your views.py
-def admin_blog_management(request):
-    blogs = Blog.objects.all().order_by('-created_at')
-    categories = Category.objects.all()
-    authors = User.objects.filter(blog__isnull=False).distinct()
-    
-    context = {
-        'blogs': blogs,
-        'categories': categories,
-        'authors': authors,
-    }
-    return render(request, 'dashboard/admin_blog_management.html', context)
-
-def webinar(request):
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def webinar(response):
     webinars = Webinar.objects.all().order_by('-start_datetime')
     hosts = User.objects.filter(hosted_webinars__isnull=False).distinct()
     
@@ -60,19 +64,21 @@ def webinar(request):
         'webinars': webinars,
         'hosts': hosts,
     }
-    return render(request, 'dashboard/webinar_management.html', context)
+    return render(response, 'dashboard/webinar_management.html', context)
 
-# In your views.py
-def user(request):
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def user(response):
     users = User.objects.all().order_by('-date_joined')
     
     context = {
         'users': users,
     }
-    return render(request, 'dashboard/user_management.html', context)
+    return render(response, 'dashboard/user_management.html', context)
 
-# In your views.py
-def admin_webinar_registrations(request, webinar_id=None):
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def admin_webinar_registrations(response, webinar_id=None):
     if webinar_id:
         webinar = get_object_or_404(Webinar, id=webinar_id)
         registrations = WebinarRegistration.objects.filter(webinar=webinar)
@@ -87,34 +93,32 @@ def admin_webinar_registrations(request, webinar_id=None):
         'webinars': webinars,
         'webinar': webinar,
     }
-    return render(request, 'dashboard/admin_webinar_registrations.html', context)
+    return render(response, 'dashboard/admin_webinar_registrations.html', context)
 
-def is_admin(user):
-    """Check if user is staff/admin"""
-    return user.is_staff or user.is_superuser
-
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_admin)
-def registration_edit(request, pk):
+def registration_edit(response, pk):
     """Edit a registration"""
     registration = get_object_or_404(WebinarRegistration, pk=pk)
     
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST, instance=registration)
+    if response.method == 'POST':
+        form = RegistrationForm(response.POST, instance=registration)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Registration updated successfully!')
+            messages.success(response, 'Registration updated successfully!')
             return redirect('webinar_management')
     else:
         form = RegistrationForm(instance=registration)
     
-    return render(request, 'dashboard/registrations.html', {
+    return render(response, 'dashboard/registrations.html', {
         'form': form,
         'registration': registration
     })
 
-def webinar_reg(request, pk):
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def webinar_reg(response, pk):
     webinar = get_object_or_404(Webinar, id=pk)
     registrations = WebinarRegistration.objects.filter(webinar=webinar)
 
-    return render(request, 'dashboard/webinar_details.html', {'webinar':webinar, 'registrations':registrations})
+    return render(response, 'dashboard/webinar_details.html', {'webinar':webinar, 'registrations':registrations})

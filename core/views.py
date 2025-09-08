@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-def index(request):
+def index(response):
     posts = Blog.objects.filter(is_verified=True).order_by('-created_at')[:3]
     webinars=Webinar.objects.all().order_by('-created_at')[:3]
 
@@ -17,7 +17,7 @@ def index(request):
         'webinars':webinars
     }
 
-    return render(request, 'core/index.html', context)
+    return render(response, 'core/index.html', context)
 
 class blog(ListView):
     model = Blog
@@ -62,12 +62,12 @@ class webinar_delete(DeleteView):
     success_url = reverse_lazy('webinar')
 
 @login_required(login_url='login')
-def blogpost(request, pk):
+def blogpost(response, pk):
     blog = Blog.objects.get(id=pk)
-    if request.method == "POST":
-        form = CommentSection(request.POST)
+    if response.method == "POST":
+        form = CommentSection(response.POST)
         if form.is_valid():
-            n = f"{request.user.first_name} {request.user.last_name}"
+            n = f"{response.user.first_name} {response.user.last_name}"
             c = form.cleaned_data["body"]
             Comment.objects.create(
                 blog=blog,
@@ -78,30 +78,30 @@ def blogpost(request, pk):
 
     else:
         form = CommentSection()
-        return render(request, 'blog/post.html', {'blog':blog, 'form':form})
+        return render(response, 'blog/post.html', {'blog':blog, 'form':form})
     
 def about(response):
     return render(response, 'core/about.html')
 
 @login_required(login_url='login')
-def webinar_detail(request, pk):
+def webinar_detail(response, pk):
     webinar = get_object_or_404(Webinar, pk=pk)
     
     # Check if user is already registered
     is_registered = False
-    if request.user.is_authenticated:
+    if response.user.is_authenticated:
         is_registered = WebinarRegistration.objects.filter(
             webinar=webinar, 
-            email=request.user.email
+            email=response.user.email
         ).exists()
     
     # Handle registration form submission
-    if request.method == 'POST':
-        form = WebinarRegistrationForm(request.POST, request.FILES)
+    if response.method == 'POST':
+        form = WebinarRegistrationForm(response.POST, response.FILES)
         if form.is_valid():
             # Check if user is already registered (prevent duplicate registrations)
             if is_registered:
-                messages.error(request, 'You are already registered for this webinar!')
+                messages.error(response, 'You are already registered for this webinar!')
                 return redirect('webinar_detail', pk=webinar.pk)
             
             # Create registration
@@ -110,13 +110,13 @@ def webinar_detail(request, pk):
             registration.status = "pending"
             
             # Set user information if authenticated
-            if request.user.is_authenticated:
-                registration.full_name = f"{request.user.first_name} {request.user.last_name}"
-                registration.email = request.user.email
+            if response.user.is_authenticated:
+                registration.full_name = f"{response.user.first_name} {response.user.last_name}"
+                registration.email = response.user.email
             
             registration.save()
             
-            messages.success(request, 'Your registration was successful!')
+            messages.success(response, 'Your registration was successful!')
             return redirect('webinar_detail', pk=webinar.pk)
         
     else:
@@ -128,7 +128,7 @@ def webinar_detail(request, pk):
             'is_registered': is_registered,
             'now': timezone.now(),
         }
-        return render(request, 'webinar/details.html', context)
+        return render(response, 'webinar/details.html', context)
     
 def webinar_register(response, pk):
     webinar = Webinar.objects.get(id=pk)
