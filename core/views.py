@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-def index(response):
+def index(request):
     posts = Blog.objects.filter(is_verified=True).order_by('-created_at')[:3]
     webinars=Webinar.objects.all().order_by('-created_at')[:3]
 
@@ -17,7 +17,7 @@ def index(response):
         'webinars':webinars
     }
 
-    return render(response, 'core/index.html', context)
+    return render(request, 'core/index.html', context)
 
 class blog(ListView):
     model = Blog
@@ -62,12 +62,12 @@ class webinar_delete(DeleteView):
     success_url = reverse_lazy('webinar')
 
 @login_required(login_url='login')
-def blogpost(response, pk):
+def blogpost(request, pk):
     blog = Blog.objects.get(id=pk)
-    if response.method == "POST":
-        form = CommentSection(response.POST)
+    if request.method == "POST":
+        form = CommentSection(request.POST)
         if form.is_valid():
-            n = f"{response.user.first_name} {response.user.last_name}"
+            n = f"{request.user.first_name} {request.user.last_name}"
             c = form.cleaned_data["body"]
             Comment.objects.create(
                 blog=blog,
@@ -78,7 +78,7 @@ def blogpost(response, pk):
 
     else:
         form = CommentSection()
-        return render(response, 'blog/post.html', {'blog':blog, 'form':form})
+        return render(request, 'blog/post.html', {'blog':blog, 'form':form})
     
 def about(response):
     return render(response, 'core/about.html')

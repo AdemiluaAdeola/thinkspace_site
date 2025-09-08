@@ -113,8 +113,8 @@ def registration_edit(request, pk):
         'registration': registration
     })
 
-def webinar_reg(response, pk):
+def webinar_reg(request, pk):
     webinar = get_object_or_404(Webinar, id=pk)
     registrations = WebinarRegistration.objects.filter(webinar=webinar)
 
-    return render(response, 'dashboard/webinar_details.html', {'webinar':webinar, 'registrations':registrations})
+    return render(request, 'dashboard/webinar_details.html', {'webinar':webinar, 'registrations':registrations})
