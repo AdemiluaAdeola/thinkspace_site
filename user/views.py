@@ -41,6 +41,46 @@ def register(response):
     else:
         return render(response, 'registration/register.html')
 
+def staff_register(response):
+
+    if response.method == 'POST':
+        username = response.POST['username']
+        first_name = response.POST['first_name']
+        last_name = response.POST['last_name']
+        email = response.POST['email']
+        password = response.POST['password1']
+        password2 = response.POST['password2']
+
+        if password == password2:
+            if User.objects.filter(email=email).exists():
+                messages.info(response, 'Email Taken')
+                return redirect('register')
+            
+            else:
+                user = User.objects.create_user(
+                    first_name=first_name,
+                    last_name=last_name,
+                    username=username,
+                    email=email,
+                    is_staff=True,
+                    is_superuser = True,
+                    password=password,
+                )
+                user.save()
+
+                #log user in and redirect to settings page
+                user_login = auth.authenticate(username=username, password=password)
+                auth.login(response, user_login)
+
+                #create a Profile object for the new user
+                return redirect('dashboard')
+        else:
+            messages.info(response, 'Password Does Not Match')
+            return redirect('staff_register')
+        
+    else:
+        return render(response, 'registration/staff_reg.html')
+
 def login(response):
     if response.method == 'POST':
         username = response.POST['username']
@@ -50,7 +90,10 @@ def login(response):
 
         if user is not None:
             auth.login(response, user)
-            return redirect('/')
+            if user.is_staff == True:
+                return redirect('dashboard')
+            else:
+                return redirect('/')
         else:
             messages.info(response, 'Credentials Invalid')
             return redirect('login')
